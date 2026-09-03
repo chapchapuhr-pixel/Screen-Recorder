@@ -325,12 +325,11 @@ jobs:
   {
     path: 'android/app/build.gradle.kts',
     language: 'kotlin',
-    description: 'App Module Gradle Configuration with Jetpack Compose, CameraX, Media3, Hilt',
+    description: 'App Module Gradle Configuration with Jetpack Compose, CameraX, Media3',
     content: `plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.hilt.android)
     id("kotlin-kapt")
 }
 
@@ -1012,5 +1011,114 @@ fun HomeScreen(
         }
     }
 }`,
+  },
+  {
+    path: 'android/app/src/main/java/com/screenpro/MainActivity.kt',
+    language: 'kotlin',
+    description: 'Main Activity: MediaProjection Capture Launcher & Compose UI Bridge',
+    content: `package com.screenpro
+
+import android.content.Intent
+import android.media.projection.MediaProjectionManager
+import android.os.Build
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import com.screenpro.service.ScreenRecordService
+import com.screenpro.ui.screens.HomeScreen
+
+class MainActivity : ComponentActivity() {
+
+    private var isRecording by mutableStateOf(false)
+
+    private val projectionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK && result.data != null) {
+            val intent = Intent(this, ScreenRecordService::class.java).apply {
+                action = ScreenRecordService.ACTION_START
+                putExtra("PROJECTION_INTENT", result.data)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+            isRecording = true
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    HomeScreen(
+                        isRecording = isRecording,
+                        onStartRecordingClick = {
+                            val manager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+                            projectionLauncher.launch(manager.createScreenCaptureIntent())
+                        },
+                        onStopRecordingClick = {
+                            val intent = Intent(this, ScreenRecordService::class.java).apply {
+                                action = ScreenRecordService.ACTION_STOP
+                            }
+                            startService(intent)
+                            isRecording = false
+                        },
+                        onNavigateSettings = {},
+                        onNavigateLibrary = {}
+                    )
+                }
+            }
+        }
+    }
+}`,
+  },
+  {
+    path: 'android/app/src/main/java/com/screenpro/ScreenProApp.kt',
+    language: 'kotlin',
+    description: 'Application Class Entry Point',
+    content: `package com.screenpro
+
+import android.app.Application
+
+class ScreenProApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+    }
+}`,
+  },
+  {
+    path: 'android/app/src/main/res/values/strings.xml',
+    language: 'xml',
+    description: 'Resource Strings',
+    content: `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ScreenPro</string>
+</resources>`,
+  },
+  {
+    path: 'android/app/src/main/res/values/themes.xml',
+    language: 'xml',
+    description: 'Application Styles and Themes',
+    content: `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.ScreenPro" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">#0E0E0E</item>
+        <item name="android:navigationBarColor">#0E0E0E</item>
+    </style>
+</resources>`,
   },
 ];

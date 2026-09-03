@@ -71,7 +71,6 @@ include(":app")
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
-    alias(libs.plugins.hilt.android) apply false
 }
 `
       );
@@ -85,7 +84,6 @@ composeBom = "2025.02.00"
 camera = "1.4.1"
 media3 = "1.5.1"
 room = "2.6.1"
-hilt = "2.51.1"
 
 [libraries]
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -117,7 +115,6 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 `
       );
 
