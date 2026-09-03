@@ -133,6 +133,19 @@ zipStorePath=wrapper/dists
 `
       );
 
+      // Attempt to include official gradle-wrapper.jar so ./gradlew works out of the box locally
+      try {
+        const jarRes = await fetch(
+          'https://raw.githubusercontent.com/gradle/gradle/v8.11.1/gradle/wrapper/gradle-wrapper.jar'
+        );
+        if (jarRes.ok) {
+          const jarBlob = await jarRes.blob();
+          zip.file('android/gradle/wrapper/gradle-wrapper.jar', jarBlob);
+        }
+      } catch {
+        // Handled: CI workflow will automatically fetch it if missing
+      }
+
       zip.file(
         'android/README.md',
         `# ScreenPro — Professional Android Screen Recorder
